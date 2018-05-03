@@ -1,0 +1,68 @@
+#!/bin/bash
+
+#*********************************************************************************************************
+#*   __     __               __     ______                __   __                      _______ _______   *
+#*  |  |--.|  |.---.-..----.|  |--.|   __ \.---.-..-----.|  |_|  |--..-----..----.    |       |     __|  *
+#*  |  _  ||  ||  _  ||  __||    < |    __/|  _  ||     ||   _|     ||  -__||   _|    |   -   |__     |  *
+#*  |_____||__||___._||____||__|__||___|   |___._||__|__||____|__|__||_____||__|      |_______|_______|  *
+#* http://www.blackpantheros.eu | http://www.blackpanther.hu - kbarcza[]blackpanther.hu * Charles Barcza *
+#*************************************************************************************(c)2002-2018********
+
+NAME=$1
+COMM=$2
+EXE=$3
+ICON=$4
+
+if [ ! -n "$NAME" -a ! -n "$COMM" -a ! -n "$EXE" -a ! -n "$ICON" ];then
+    echo
+    echo "Format requires: 
+    $0 'App Name' 'Application description' '/path/to/executable' '/path/to/icon'"
+    echo
+    exit
+fi
+
+if [ -x "$EXE" ];then
+    CURRENT_DIR=$(pwd)
+fi
+
+create_desktop_entry() {
+	NAME="$NAME"
+	COMMENT="$COMM"
+
+	EXECUTABLE=$CURRENT_DIR/$EXE
+	ICON_PATH=$CURRENT_DIR/$ICON
+
+	DESTINATION_DIR=/home/$(whoami)/.local/share/applications
+	DESKTOP_FILE=$DESTINATION_DIR/$EXE.desktop
+
+	echo "[Desktop Entry]" > $DESKTOP_FILE
+	echo "Version=1.0" >> $DESKTOP_FILE
+	echo "Type=Application" >> $DESKTOP_FILE
+	echo "Name=$NAME" >> $DESKTOP_FILE
+	echo "Icon=$ICON_PATH" >> $DESKTOP_FILE
+	echo "Exec=\"$EXECUTABLE\" %U" >> $DESKTOP_FILE
+	echo "Comment=$COMMENT" >> $DESKTOP_FILE
+	echo "Categories=Multimedia;" >> $DESKTOP_FILE
+	echo "Terminal=false" >> $DESKTOP_FILE
+
+	# Updates the desktop entries
+	gtk-update-icon-cache /usr/share/icons/hicolor
+
+	echo "Desktop entry added for $(whoami)"
+}
+
+printf "Create a desktop entry for Popcorn Time for the current user ? (Y)es/(N)o: "
+read -n1 input
+
+
+if [ "$input" == "Y" ] || [ "$input" == "y" ] || [ "$input" == "" ]
+then
+	case "$(uname)" in
+		Linux)
+			create_desktop_entry ;;
+		Darwin)
+			echo "Create a desktop entry is only meant to be used on Linux" ;;
+	esac
+else
+	echo -e "Cancel. /nJust execute ./Create-Desktop-Entry when you are ready to create a desktop entry for Popcorn Time"
+fi
